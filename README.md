@@ -26,22 +26,30 @@
  cd containers-python-django
  ```
  
- 2. Install the required dependencies using pip.
+ 2. Launch the devcontainer located at `.devcontainer/devcontainer.json`
+
+ 3. Install the required dependencies using poetry.
  
  ```bash
- pip install -r requirements.txt
+ poetry install
  ```
  
  3. Run the Django application locally.
  
  ```bash
- python manage.py runserver
+ poetry run manage runserver
  ```
  
  Your Django application should now be running locally at http://127.0.0.1:8000/.
  
  ## Deploying to Back4app Containers 
  
+ First ensure that the requirements.txt file is up-to-date in case you've updated any dependencies:
+
+ ```bash
+ poetry export -f requirements.txt --output requirements.txt
+ ```
+
  Follow the step-by-step guide in the article "Run a Django Container App"(https://www.back4app.com/docs-containers/run-a-django-container-app) to deploy this sample Django application on Back4app Containers.
  
  ## Customizing the Template 
