@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from main.views import assistant, home, TasksApiView, get_tasks
+from main.views import assistant, home, TasksApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,8 +25,7 @@ urlpatterns = [
     path('api', home),
     path('', home),
 
-    path('api/tasks', TasksApiView.as_view()),
-    path('api/get_tasks/<int:user_id>', get_tasks),
+    path('api/tasks/<int:user_id>', TasksApiView.as_view()),
 
     path('api/assistant', assistant),
 ]

@@ -10,6 +10,6 @@ COPY . .
 
 EXPOSE 8000
 
-RUN chmod +x containers_python_django/init_and_wsgi.sh
+RUN chmod +x containers_python_django/startup.sh
 
-CMD [ "./containers_python_django/init_and_wsgi.sh" ]
+CMD [ "./containers_python_django/startup.sh" ]
