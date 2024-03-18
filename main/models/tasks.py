@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-import sqlite3
+import json
+import logging
+from typing import List
 from django.db import models
+from .utils import redis
 
 @dataclass
 class NewTaskData:
@@ -24,6 +27,16 @@ class Task(models.Model):
     state = models.CharField(max_length=20, choices=State.choices, default=State.pending)
     priority = models.IntegerField(choices=Priority.choices, default=Priority.unknown)
 
-    # def open_status(self):
-    #     now = sqlite3.func.current_time()
-    #     return now > self.opens_at and now < self.closes_at
+
+def get_tasks(user_id) -> List[dict]:
+    task_list_key = f'user:tasklist:{user_id}:default2'
+    logging.info(f"Fetching tasks from task list: {task_list_key}")
+    return [json.loads(task) for task in redis.zrange(task_list_key, 0, 100)]
+
+def delete_task(user_id, task_id):
+    task_list_key = f'user:tasklist:{user_id}:default2'
+    task_id = float(task_id)
+    logging.info(f"Deleting task '{task_id}' from task list: {task_list_key}")
+    result = redis.zremrangebyscore(task_list_key, task_id, task_id)
+    logging.info(f"Deleting task '{task_id}' from task list: {task_list_key} resulted in {result}")
+    return result
