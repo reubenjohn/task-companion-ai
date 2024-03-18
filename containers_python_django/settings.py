@@ -32,6 +32,8 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 DEBUG = bool(os.getenv("DJANGO_DEBUG", "False"))
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") # A list of trusted origins for unsafe requests
+CORS_ORIGIN_WHITELIST = os.getenv("DJANGO_CORS_ORIGIN_WHITELIST", "").split(",")
 
 # Application definition
 
