@@ -29,12 +29,12 @@ class Task(models.Model):
 
 
 def get_tasks(user_id) -> List[dict]:
-    task_list_key = f'user:tasklist:{user_id}:default2'
+    task_list_key = f'user:tasklist:{user_id}:default'
     logging.info(f"Fetching tasks from task list: {task_list_key}")
     return [json.loads(task) for task in redis.zrange(task_list_key, 0, 100)]
 
 def delete_task(user_id, task_id):
-    task_list_key = f'user:tasklist:{user_id}:default2'
+    task_list_key = f'user:tasklist:{user_id}:default'
     task_id = float(task_id)
     logging.info(f"Deleting task '{task_id}' from task list: {task_list_key}")
     result = redis.zremrangebyscore(task_list_key, task_id, task_id)

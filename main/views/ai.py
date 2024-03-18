@@ -1,7 +1,9 @@
 import json
 import logging
 import os
-from django.http import JsonResponse
+from time import sleep
+from django.http import JsonResponse, StreamingHttpResponse
+from rest_framework.views import APIView
 
 from langchain.agents.openai_assistant import OpenAIAssistantRunnable
 
@@ -23,10 +25,19 @@ def get_assistant():
             )
         os.environ['OPENAI_ASSISTANT_ID'] = new_assistant.assistant_id
         return new_assistant
-        
 
-def assistant(request):
+
+def assistant(request, user_id):
     logging.debug("Invoking assistant")
     interpretter_assistant = get_assistant()
     output = interpretter_assistant.invoke({"content": "What's 10 - 4 raised to the 2.7"})
     return JsonResponse({"messages": [json.loads(message.json()) for message in output]})
+
+def stream(request, user_id):
+    return StreamingHttpResponse(get_stream())
+
+def get_stream():
+    # Use an asynchronous generator to yield chunks of data
+    for i in range(1000):
+        yield str(i) + ','
+        sleep(.1)
