@@ -783,6 +783,9 @@ typing-inspect==0.9.0 ; python_version >= "3.10" and python_version < "4.0" \
 tzdata==2024.1 ; python_version >= "3.10" and python_version < "4.0" and sys_platform == "win32" \
     --hash=sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd \
     --hash=sha256:9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252
+upstash-redis==1.0.0 ; python_version >= "3.10" and python_version < "4.0" \
+    --hash=sha256:4fe84cfa9f63d31b0ebd8cd5102f086068b52cafbf062fd0a9088ebcd7075393 \
+    --hash=sha256:960ac8c1309589fa062243ae3c68555194f5d732c6663d30a2a3cff43494e310
 urllib3==2.2.1 ; python_version >= "3.10" and python_version < "4.0" \
     --hash=sha256:450b20ec296a467077128bff42b73080516e71b56ff59a60a02bef2232c4fa9d \
     --hash=sha256:d0570876c61ab9e520d776c38acbbb5b05a776d3f9ff98a5c8fd5162a444cf19

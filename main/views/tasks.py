@@ -11,12 +11,22 @@
 # def create_task(request):
 #     pass
 
+import logging
+import os
+from upstash_redis import Redis
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from ..models import Task
 from ..serializers import TodoSerializer
+
+
+redis = Redis(
+    url=os.environ["KV_REST_API_URL"],
+    token=os.environ["KV_REST_API_TOKEN"],
+    )
 
 class TasksApiView(APIView):
     # add permission to check if user is authenticated
@@ -44,3 +54,8 @@ class TasksApiView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def get_tasks(request, user_id):
+    task_list_key = f'user:tasklist:{user_id}:default'
+    logging.info(f"Fetching tasks from task list: {task_list_key}")
+    return JsonResponse({"tasks": redis.zrange(task_list_key, 0, 100)})
