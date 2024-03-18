@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from django.shortcuts import render
 from django.http import JsonResponse
 
 from langchain.agents.openai_assistant import OpenAIAssistantRunnable
@@ -25,12 +24,6 @@ def get_assistant():
         os.environ['OPENAI_ASSISTANT_ID'] = new_assistant.assistant_id
         return new_assistant
         
-
-def home(request):
-    logging.debug("Rendering home.html")
-    return render(request, 'home.html')
-
-
 
 def assistant(request):
     logging.debug("Invoking assistant")

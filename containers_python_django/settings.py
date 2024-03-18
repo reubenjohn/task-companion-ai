@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    
     "main",
 ]
 
@@ -147,4 +151,10 @@ LOGGING = {
         'handlers': ['console'],
         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  # Set the desired root log level
     },
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }

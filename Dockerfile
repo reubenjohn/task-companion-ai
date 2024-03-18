@@ -10,4 +10,6 @@ COPY . .
 
 EXPOSE 8000
 
-CMD [ "gunicorn", "containers_python_django.wsgi:application", "--bind", "0.0.0.0:8000" ]
+RUN chmod +x containers_python_django/init_and_wsgi.sh
+
+CMD [ "./containers_python_django/init_and_wsgi.sh" ]
