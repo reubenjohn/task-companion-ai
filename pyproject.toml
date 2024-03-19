@@ -15,6 +15,7 @@ langchain = "^0.1.12"
 openai = "^1.14.1"
 django-rest-framework = "^0.1.0"
 upstash-redis = "^1.0.0"
+langchain-openai = "^0.0.8"
 
 [tool.poetry.scripts]
 manage = "manage:main"
