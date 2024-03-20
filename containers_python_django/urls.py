@@ -14,19 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
-from main.views import assistant, stream, home, TasksApiView
+from main.views import companion, home, TasksApiView
+from main.views.stream_demo import stream
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-
-    path('api', home),
-    path('', home),
-
-    path('api/tasks/<int:user_id>', TasksApiView.as_view()),
-
-    path('api/assistant/<int:user_id>', assistant),
-    path('api/stream/<int:user_id>', stream),
+    path("admin/", admin.site.urls),
+    path("api-auth/", include("rest_framework.urls")),
+    path("api", home),
+    path("", home),
+    path("api/tasks/<int:user_id>", TasksApiView.as_view()),
+    path("api/companion/<int:user_id>", companion),
+    path("api/stream/<int:user_id>", stream),
 ]
