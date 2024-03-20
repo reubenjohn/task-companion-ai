@@ -1,22 +1,16 @@
 import json
+from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from main.utils.generators import (
+    sync_generator_from_async,
+    wrap_generator_in_json_array,
+)
+
+
 from django.http import StreamingHttpResponse
 
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import AgentExecutor, create_openai_tools_agent
-from langchain_openai import ChatOpenAI
-
-from main.utils.generators import sync_generator_from_async
-from main.utils.generators import wrap_generator_in_json_array
-from main.views.companion.tools import get_items, where_cat_is_hiding
-
-
-def companion(request, user_id):
-    generator = sync_generator_from_async(async_assistant(user_id))
-    generator = wrap_generator_in_json_array(generator)
-    return StreamingHttpResponse(
-        generator,
-        content_type="application/json",
-    )
+from main.utils.tools import get_items, where_cat_is_hiding
 
 
 async def async_assistant(user_id):
@@ -83,3 +77,12 @@ async def async_assistant(user_id):
             print(f"Done tool: {event['name']}")
             print(f"Tool output was: {event['data'].get('output')}")
             print("--")
+
+
+def chat(request, user_id):
+    generator = sync_generator_from_async(async_assistant(user_id))
+    generator = wrap_generator_in_json_array(generator)
+    return StreamingHttpResponse(
+        generator,
+        content_type="application/json",
+    )

@@ -17,7 +17,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from main.views import companion, home, TasksApiView
+from main.views import home, TasksApiView
+from main.views.companion.chat import chat
+from main.views.companion.tools import get_items, query_tasks, where_cat_is_hiding
 from main.views.stream_demo import stream
 
 urlpatterns = [
@@ -26,6 +28,9 @@ urlpatterns = [
     path("api", home),
     path("", home),
     path("api/tasks/<int:user_id>", TasksApiView.as_view()),
-    path("api/companion/<int:user_id>", companion),
+    path("api/companion/chat/<int:user_id>", chat),
+    path("api/companion/tools/get_items", get_items),
+    path("api/companion/tools/where_cat_is_hiding", where_cat_is_hiding),
+    path("api/companion/tools/query_tasks/<int:user_id>", query_tasks),
     path("api/stream/<int:user_id>", stream),
 ]

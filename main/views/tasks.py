@@ -14,13 +14,20 @@
 import logging
 from django.http import JsonResponse
 from rest_framework.views import APIView
+
+from main.models.tasks import query_tasks
+
 from ..models import get_tasks
 
 
 class TasksApiView(APIView):
     def get(self, request, user_id, *args, **kwargs):
-        '''
+        """
         List all the tasks for given requested user
-        '''
-        tasks = get_tasks(user_id)
+        """
+        query = self.request.GET.get("query", "")
+        state = self.request.GET.get("state", "all")
+
+        tasks = query_tasks(user_id, query, state)
+
         return JsonResponse({"tasks": tasks})

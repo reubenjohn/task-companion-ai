@@ -1,19 +1,21 @@
-import random
-from langchain.tools import tool
+from django.http import HttpResponse
+from main.models.utils import UserId
+from main.utils import tools
 
 
-@tool
-async def get_items(place: str) -> str:
-    """Use this tool to look up which items are in the given place."""
-    if "bed" in place:  # For under the bed
-        return "socks, shoes and dust bunnies"
-    if "shelf" in place:  # For 'shelf'
-        return "books, penciles and pictures"
-    else:  # if the agent decides to ask about a different place
-        return "cat snacks"
+def get_items(request) -> str:
+    place = request.GET.get("place", "")
+    return HttpResponse(tools.get_items_impl(place), content_type="text/plain")
 
 
-@tool
-async def where_cat_is_hiding() -> str:
-    """Where is the cat hiding right now?"""
-    return random.choice(["under the bed", "on the shelf"])
+def where_cat_is_hiding(request) -> str:
+    return HttpResponse(tools.where_cat_is_hiding_impl(), content_type="text/plain")
+
+
+def query_tasks(request, user_id: UserId) -> str:
+    query = request.GET.get("query", None)
+    state = request.GET.get("state", None)
+    return HttpResponse(
+        tools.query_tasks_impl(user_id, query=query, state=state),
+        content_type="text/plain",
+    )
