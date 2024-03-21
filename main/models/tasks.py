@@ -4,7 +4,7 @@ import logging
 from typing import List
 from django.db import models
 from .utils import UserId, redis
-
+from fuzzywuzzy import fuzz
 
 TaskId = float
 
@@ -51,7 +51,7 @@ class Task:
     id: float
     title: str
     state: str
-    priority: str
+    priority: int
 
     def human_readable(self) -> str:
         title = self.title.replace("\n", " ")
@@ -63,17 +63,40 @@ State: {self.state}"""
         return result
 
 
-def get_tasks(user_id: UserId) -> List[Task]:
+def get_tasks(user_id: UserId, limit: int = 10) -> List[Task]:
     task_list_key = f"user:tasklist:{user_id}:default"
-    logging.info(f"Fetching tasks from task list: {task_list_key}")
-    return [
-        Task(**json.loads(task)) for task in redis.zrange(task_list_key, -1e15, 1e15)
-    ]
+    logging.info(f"User {user_id} fetching tasks from task list: {task_list_key}")
+    tasks = [Task(**json.loads(task)) for task in redis.zrange(task_list_key, 0, limit)]
+    logging.info(f"User {user_id} fetched {len(tasks)} tasks from list {task_list_key}")
+    return tasks
+
+
+def text_search_score(text: Task, query: str) -> float:
+    return max(
+        fuzz.ratio(text, query) + 0.3,  # Same order full match
+        fuzz.partial_ratio(text, query) + 0.2,  # Same order partial match
+        fuzz.token_sort_ratio(text, query) + 0.1,  # Any order full match
+        fuzz.partial_token_sort_ratio(text, query),  # Any order partial match
+    )
+
+
+def task_search_score(task: Task, query: str) -> float:
+    return text_search_score(task.title, query)
 
 
 def query_tasks(user_id: UserId, query: str, state: str) -> List[Task]:
     tasks = get_tasks(user_id)
-    return tasks
+    if not query:
+        return tasks
+
+    scored_tasks = [
+        (task_search_score(task, query), task)
+        for task in tasks
+        if not state or state == "all" or task.state == state
+    ]
+    scored_tasks = [(score, task) for score, task in scored_tasks if score > 50.0]
+    scored_tasks.sort(key=lambda score_task: score_task[0], reverse=True)
+    return [task for _, task in scored_tasks]
 
 
 def delete_task(user_id: UserId, task_id: TaskId):

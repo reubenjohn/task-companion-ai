@@ -50,13 +50,17 @@ def human_readable_tasks(tasks: List[Task]) -> str:
     return "\n---\n".join([task.human_readable() for task in tasks])
 
 
-def query_tasks_impl(user_id: UserId, query: str = "", state: str = "all") -> str:
+def query_tasks_impl(user_id: UserId, query: str = None, state: str = None) -> str:
+    if query is None:
+        query = ""
+    if state is None:
+        state = "all"
     tasks = models.query_tasks(user_id, query, state)
 
     if len(tasks) == 0:
         return "No tasks found that match the search criterion. Consider using different search terms."
 
-    return f"""Found {len(tasks)} tasks that match the search criterion.
+    return f"""Found {len(tasks)} task/s that match the search criterion.
 ---
 {human_readable_tasks(tasks)}
 ---
@@ -64,8 +68,8 @@ def query_tasks_impl(user_id: UserId, query: str = "", state: str = "all") -> st
 
 
 def bind_query_tasks(user_id: UserId):
-    @tool(args_schema=SearchInput, return_direct=True)
-    async def query_tasks(query: str, state: str) -> str:
+    @tool(args_schema=SearchInput)
+    async def query_tasks(query: str = None, state: str = None) -> str:
         """Queries tasks of the given user based on the given criterion"""
         return query_tasks_impl(user_id, query, state)
 

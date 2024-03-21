@@ -2,18 +2,23 @@ import json
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
+from main.models.utils import UserId
 from main.utils.generators import (
     sync_generator_from_async,
     wrap_generator_in_json_array,
 )
 
 
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
-from main.utils.tools import get_items, where_cat_is_hiding
+from main.utils.tools import (
+    bind_query_tasks,
+    get_items,
+    where_cat_is_hiding,
+)
 
 
-async def async_assistant(user_id):
+async def async_assistant(user_id: UserId, user_input: str):
     model = ChatOpenAI(temperature=0, streaming=True)
 
     prompt = ChatPromptTemplate.from_messages(
@@ -27,7 +32,7 @@ async def async_assistant(user_id):
 
     agent_name = "Agent"
 
-    tools = [get_items, where_cat_is_hiding]
+    tools = [bind_query_tasks(user_id), get_items, where_cat_is_hiding]
 
     # agent = get_assistant(tools)
     agent = create_openai_tools_agent(
@@ -43,7 +48,7 @@ async def async_assistant(user_id):
     #     print(chunk)
 
     async for event in agent_executor.astream_events(
-        {"input": "where is the cat hiding? what items are in that location?"},
+        {"input": user_input},
         version="v1",
     ):
         yield json.dumps(str(event))
@@ -80,7 +85,10 @@ async def async_assistant(user_id):
 
 
 def chat(request, user_id):
-    generator = sync_generator_from_async(async_assistant(user_id))
+    prompt = request.GET.get("prompt", None)
+    if not prompt:
+        return HttpResponse(status=400)  # Malformed request
+    generator = sync_generator_from_async(async_assistant(user_id, prompt))
     generator = wrap_generator_in_json_array(generator)
     return StreamingHttpResponse(
         generator,
