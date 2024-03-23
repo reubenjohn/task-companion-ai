@@ -39,8 +39,8 @@ class SearchInput(BaseModel):
         default="",
     )
     state: str = Field(
-        description='An additional filter based on the state of the task: "pending" or "completed". '
-        'Defaults to "all" i.e. both pending and completed tasks',
+        description='Specify "pending" to only get pending tasks, "completed" to only get completed tasks, '
+        'or "all" to get both pending and completed tasks',
         default="all",
         regex="(all|pending|completed)",
     )

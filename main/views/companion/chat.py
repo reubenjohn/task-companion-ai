@@ -11,6 +11,7 @@ from main.utils.generators import (
 
 from django.http import HttpResponse, StreamingHttpResponse
 
+from main.utils.json_encoder import StrJSONEncoder
 from main.utils.tools import (
     bind_query_tasks,
     get_items,
@@ -51,7 +52,7 @@ async def async_assistant(user_id: UserId, user_input: str):
         {"input": user_input},
         version="v1",
     ):
-        yield json.dumps(str(event))
+        yield json.dumps(event, cls=StrJSONEncoder)
         kind = event["event"]
         if kind == "on_chain_start":
             if event["name"] == agent_name:
