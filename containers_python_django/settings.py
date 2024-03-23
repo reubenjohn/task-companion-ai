@@ -32,22 +32,24 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 DEBUG = bool(os.getenv("DJANGO_DEBUG", "False"))
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") # A list of trusted origins for unsafe requests
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(
+    ","
+)  # A list of trusted origins for unsafe requests
 CORS_ORIGIN_WHITELIST = os.getenv("DJANGO_CORS_ORIGIN_WHITELIST", "").split(",")
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    'rest_framework',
-    'rest_framework.authtoken',
-    
+    "rest_framework",
+    "rest_framework.authtoken",
     "main",
 ]
 
@@ -79,7 +81,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "containers_python_django.wsgi.application"
+# WSGI_APPLICATION = "containers_python_django.wsgi.application"
+ASGI_APPLICATION = "containers_python_django.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
 
 
 # Database
@@ -135,28 +141,32 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(message)s",
         },
     },
-    'handlers': {
-        'console': {
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  # Set the desired log level (e.g., DEBUG, INFO, ERROR)
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+    "handlers": {
+        "console": {
+            "level": os.getenv(
+                "DJANGO_LOG_LEVEL", "INFO"
+            ),  # Set the desired log level (e.g., DEBUG, INFO, ERROR)
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  # Set the desired root log level
+    "root": {
+        "handlers": ["console"],
+        "level": os.getenv(
+            "DJANGO_LOG_LEVEL", "INFO"
+        ),  # Set the desired root log level
     },
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
 }
