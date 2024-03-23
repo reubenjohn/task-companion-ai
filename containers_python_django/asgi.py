@@ -12,7 +12,7 @@ import os
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
-from main.routing import websocket_urlpatterns
+from containers_python_django.urls import websocket_urlpatterns
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "containers_python_django.settings")
