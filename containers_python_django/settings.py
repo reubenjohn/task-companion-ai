@@ -83,9 +83,9 @@ TEMPLATES = [
 
 # WSGI_APPLICATION = "containers_python_django.wsgi.application"
 ASGI_APPLICATION = "containers_python_django.asgi.application"
-CHANNEL_LAYERS = {
-    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
-}
+
+
+# CHANNEL_LAYERS = {}
 
 
 # Database
