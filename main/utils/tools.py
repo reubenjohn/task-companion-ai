@@ -41,7 +41,7 @@ class SearchInput(BaseModel):
     state: str = Field(
         description='Specify "pending" to only get pending tasks, "completed" to only get completed tasks, '
         'or "all" to get both pending and completed tasks',
-        default="all",
+        default="pending",
         regex="(all|pending|completed)",
     )
 
@@ -54,11 +54,13 @@ def query_tasks_impl(user_id: UserId, query: str = None, state: str = None) -> s
     if query is None:
         query = ""
     if state is None:
-        state = "all"
+        state = "pending"
     tasks = models.query_tasks(user_id, query, state)
 
     if len(tasks) == 0:
-        return "No tasks found that match the search criterion. Consider using different search terms."
+        return (
+            "No tasks found that match the search criterion. Consider using different search terms."
+        )
 
     return f"""Found {len(tasks)} task/s that match the search criterion.
 ---

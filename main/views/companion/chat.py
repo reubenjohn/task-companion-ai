@@ -60,7 +60,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()  # Triggers self.disconnect(...)
             elif cmd == "respond":
                 user_input = json_data["payload"]
-                self.respond_task = asyncio.create_task(self.respond_to_user(self.user_id, user_input))
+                self.respond_task = asyncio.create_task(
+                    self.respond_to_user(self.user_id, user_input)
+                )
         except Exception as e:
             logging.error(e)
             await self.send(f"\nAn Error occurred: {str(e)}")
@@ -109,8 +111,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     # So we only print non-empty content
                     await self.send(f"|{content}")
             elif kind == "on_tool_start":
-                data = dict(toolName=event_name, input=event["data"].get("input"))
+                data = dict(
+                    runId=event["run_id"], toolName=event_name, input=event["data"].get("input")
+                )
                 await self.send(f"{kind}|{json.dumps(data)}")
             elif kind == "on_tool_end":
-                data = dict(toolName=event_name, output=event["data"].get("output"))
+                data = dict(
+                    runId=event["run_id"], toolName=event_name, output=event["data"].get("output")
+                )
                 await self.send(f"{kind}|{json.dumps(data)}")
+
+        await self.close()  # Triggers self.disconnect(...)

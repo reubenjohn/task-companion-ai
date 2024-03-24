@@ -85,15 +85,14 @@ def task_search_score(task: Task, query: str) -> float:
 
 
 def query_tasks(user_id: UserId, query: str, state: str) -> List[Task]:
+    logging.info(f"query_tasks(user_id={user_id}, query={query}, state={state})")
     tasks = get_tasks(user_id)
+    if state != "all":
+        tasks = [task for task in tasks if state == task.state]
     if not query:
         return tasks
 
-    scored_tasks = [
-        (task_search_score(task, query), task)
-        for task in tasks
-        if not state or state == "all" or task.state == state
-    ]
+    scored_tasks = [(task_search_score(task, query), task) for task in tasks]
     scored_tasks = [(score, task) for score, task in scored_tasks if score > 50.0]
     scored_tasks.sort(key=lambda score_task: score_task[0], reverse=True)
     return [task for _, task in scored_tasks]
@@ -104,7 +103,5 @@ def delete_task(user_id: UserId, task_id: TaskId):
     task_id = float(task_id)
     logging.info(f"Deleting task '{task_id}' from task list: {task_list_key}")
     result = redis.zremrangebyscore(task_list_key, task_id, task_id)
-    logging.info(
-        f"Deleting task '{task_id}' from task list: {task_list_key} resulted in {result}"
-    )
+    logging.info(f"Deleting task '{task_id}' from task list: {task_list_key} resulted in {result}")
     return result
