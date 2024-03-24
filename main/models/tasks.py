@@ -66,7 +66,7 @@ State: {self.state}"""
 def get_tasks(user_id: UserId, limit: int = 10) -> List[Task]:
     task_list_key = f"user:tasklist:{user_id}:default"
     logging.info(f"User {user_id} fetching tasks from task list: {task_list_key}")
-    tasks = [Task(**json.loads(task)) for task in redis.zrange(task_list_key, 0, limit)]
+    tasks = [Task(**json.loads(task)) for task in redis().zrange(task_list_key, 0, limit)]
     logging.info(f"User {user_id} fetched {len(tasks)} tasks from list {task_list_key}")
     return tasks
 
@@ -102,6 +102,6 @@ def delete_task(user_id: UserId, task_id: TaskId):
     task_list_key = f"user:tasklist:{user_id}:default"
     task_id = float(task_id)
     logging.info(f"Deleting task '{task_id}' from task list: {task_list_key}")
-    result = redis.zremrangebyscore(task_list_key, task_id, task_id)
+    result = redis().zremrangebyscore(task_list_key, task_id, task_id)
     logging.info(f"Deleting task '{task_id}' from task list: {task_list_key} resulted in {result}")
     return result

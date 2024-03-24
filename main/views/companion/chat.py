@@ -1,22 +1,13 @@
 import asyncio
-from dataclasses import dataclass
 import json
 import logging
-from time import sleep
 from channels.generic.websocket import AsyncWebsocketConsumer
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from main.models.utils import UserId
-from main.utils.generators import (
-    sync_generator_from_async,
-    wrap_generator_in_json_array,
-)
 
 
-from django.http import HttpResponse, StreamingHttpResponse
-
-from main.utils.json_encoder import StrJSONEncoder
 from main.utils.tools import (
     bind_query_tasks,
     get_items,
