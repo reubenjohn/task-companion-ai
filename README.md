@@ -31,6 +31,10 @@
  3. Install the required dependencies using poetry.
  
  ```bash
+ # If you're using VS Code, configure poetry to create the virtual environment inside the project in .venv folder
+ # This makes it easier for VS Code to discover the interpreter for debugging the app
+ poetry config virtualenvs.in-project true
+
  poetry install
  ```
  
@@ -39,6 +43,7 @@
  ```bash
  poetry run manage runserver
  ```
+ Alternatively, just hit F5 if you're using VS Code to launch the server in debug mode.
  
  Your Django application should now be running locally at http://127.0.0.1:8000/.
  
