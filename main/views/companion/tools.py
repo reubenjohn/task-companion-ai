@@ -1,6 +1,6 @@
 from django.http import HttpResponse
-from main.models.utils import UserId
-from main.utils import tools
+from companion.db.utils import UserId
+from companion import tools
 
 
 def get_items(request) -> str:

@@ -3,9 +3,8 @@ from typing import List
 from langchain.pydantic_v1 import BaseModel, Field
 from langchain.tools import tool
 
-from main import models
-from main.models.tasks import Task
-from main.models.utils import UserId
+from companion.db.tasks import Task, query_tasks
+from companion.db.utils import UserId
 
 
 def get_items_impl(place: str) -> str:
@@ -55,7 +54,7 @@ def query_tasks_impl(user_id: UserId, query: str = None, state: str = None) -> s
         query = ""
     if state is None:
         state = "pending"
-    tasks = models.query_tasks(user_id, query, state)
+    tasks = query_tasks(user_id, query, state)
 
     if len(tasks) == 0:
         return (

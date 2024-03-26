@@ -15,9 +15,7 @@ import logging
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
-from main.models.tasks import query_tasks
-
-from ..models import get_tasks
+from companion.db.tasks import query_tasks
 
 
 class TasksApiView(APIView):
