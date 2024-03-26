@@ -29,11 +29,23 @@ async def display_frames(async_generator):
         )
 
 
+def multiline_input(prompt: str = ""):
+    print(prompt, end="")
+    contents = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        contents.append(line)
+    return "\n".join(contents)
+
+
 def exec_conversation(user_id: str):
     companion = Companion(user_id)
 
     while True:
-        user_input = input("User prompt: ")
+        user_input = multiline_input("User prompt (Ctrl-D or Ctrl-Z on windows to send): ")
         if user_input == None:
             break
         async_generator = companion.astream_events(user_input)
@@ -45,12 +57,20 @@ def exec_conversation(user_id: str):
 
 if __name__ == "__main__":
     import argparse
+    import os
+    import logging
     from dotenv import load_dotenv
 
     from companion.cli import exec_conversation
 
     load_dotenv(".env.local")
     load_dotenv(".env", override=True)
+
+    # Read the log level from the environment variable (default to WARNING)
+    log_level = os.environ.get("LOGLEVEL", "WARNING").upper()
+
+    # Configure the logging module
+    logging.basicConfig(level=log_level)
 
     parser = argparse.ArgumentParser(description="task-companion-cli")
     parser.add_argument("user_id", type=str, help="The user ID of the user eg. 9812352")

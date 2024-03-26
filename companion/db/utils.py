@@ -1,6 +1,8 @@
 import os
 from upstash_redis import Redis
 
+UserId = int
+
 _redis = None
 
 
@@ -12,6 +14,3 @@ def redis():
             token=os.environ["KV_REST_API_TOKEN"],
         )
     return _redis
-
-
-UserId = int

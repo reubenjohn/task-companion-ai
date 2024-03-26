@@ -1,19 +1,28 @@
 import json
-from langchain.agents import AgentExecutor, create_openai_tools_agent, StructuredChatAgent
-from langchain.agents.openai_functions_agent.agent_token_buffer_memory import (
-    AgentTokenBufferMemory,
-)
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
+from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
+from companion.db.conversation_history import RedisConversationSummaryBufferMemory
 from companion.tools import bind_query_tasks, get_items, where_cat_is_hiding
-from langchain.memory import ConversationBufferMemory
 
 AGENT_NAME = "Agent"
 
 
 class Companion:
-    def __init__(self, user_id: str) -> None:
+    def __init__(
+        self, user_id: str, max_message_size: int = 1000, max_token_limit: int = 2000
+    ) -> None:
         model = ChatOpenAI(temperature=0, streaming=True)
+        memory = RedisConversationSummaryBufferMemory(
+            user_id=user_id,
+            memory_key="chat_history",
+            llm=model,
+            return_messages=True,
+            output_key="output",
+            max_token_limit=max_token_limit,
+        )
+        memory.fetch_from_db()
+        self.max_message_size = max_message_size
 
         prompt = ChatPromptTemplate.from_messages(
             [
@@ -29,7 +38,9 @@ class Companion:
         # agent = get_assistant(tools)
         agent = create_openai_tools_agent(model.with_config({"tags": ["agent_llm"]}), tools, prompt)
 
-        self.agent_executor = AgentExecutor(agent=agent, tools=tools)
+        self.agent_executor = AgentExecutor(
+            agent=agent, tools=tools, memory=memory, return_intermediate_steps=True
+        )
         self.runnable = self.agent_executor.with_config(
             {"run_name": AGENT_NAME},
         )
@@ -38,6 +49,10 @@ class Companion:
         self.agent_executor.max_iterations = 0
 
     async def astream_events(self, user_input: str):
+        if len(user_input) > self.max_message_size:
+            raise Exception(
+                f"User message of size {len(user_input)} exceeds limit of {self.max_message_size}"
+            )
         async for event in self.runnable.astream_events(
             {
                 "input": user_input,
@@ -70,3 +85,6 @@ class Companion:
                     runId=event["run_id"], toolName=event_name, output=event["data"].get("output")
                 )
                 yield f"{kind}|{json.dumps(data)}"
+
+        memory = self.agent_executor.memory  # type: RedisConversationSummaryBufferMemory
+        memory.persist()

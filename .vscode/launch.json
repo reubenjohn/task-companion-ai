@@ -10,7 +10,8 @@
             "request": "launch",
             "module": "companion.cli",
             "console": "integratedTerminal",
-            "args": "4802052" // User ID
+            "args": "4802052", // User ID
+            "justMyCode": false
         },
         {
             "name": "Python Debugger: Django",
@@ -22,7 +23,8 @@
                 "0.0.0.0:8000"
             ],
             "django": true,
-            "autoStartBrowser": false
+            "autoStartBrowser": false,
+            "justMyCode": false
         }
     ]
 }
