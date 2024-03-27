@@ -7,31 +7,6 @@ from companion.db.tasks import Task, query_tasks
 from companion.db.utils import UserId
 
 
-def get_items_impl(place: str) -> str:
-    if "bed" in place:  # For under the bed
-        return "socks, shoes and dust bunnies"
-    if "shelf" in place:  # For 'shelf'
-        return "books, penciles and pictures"
-    else:  # if the agent decides to ask about a different place
-        return "cat snacks"
-
-
-@tool
-async def get_items(place: str) -> str:
-    """Use this tool to look up which items are in the given place."""
-    return get_items_impl(place)
-
-
-def where_cat_is_hiding_impl() -> str:
-    return random.choice(["under the bed", "on the shelf"])
-
-
-@tool
-async def where_cat_is_hiding() -> str:
-    """Where is the cat hiding right now?"""
-    return where_cat_is_hiding_impl()
-
-
 class SearchInput(BaseModel):
     query: str = Field(
         description='Should be a search query an empty string "" fetches all tasks',

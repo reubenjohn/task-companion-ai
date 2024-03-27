@@ -3,7 +3,7 @@ from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from companion.db.conversation_history import RedisConversationSummaryBufferMemory
-from companion.tools import bind_query_tasks, get_items, where_cat_is_hiding
+from companion.tools import bind_query_tasks
 
 AGENT_NAME = "Agent"
 
@@ -33,7 +33,7 @@ class Companion:
             ]
         )
 
-        tools = [bind_query_tasks(user_id), get_items, where_cat_is_hiding]
+        tools = [bind_query_tasks(user_id)]
 
         # agent = get_assistant(tools)
         agent = create_openai_tools_agent(model.with_config({"tags": ["agent_llm"]}), tools, prompt)
