@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 import logging
 from typing import List
-from django.db import models
+from pydantic import BaseModel
 from .utils import UserId, redis
 from fuzzywuzzy import fuzz
 
@@ -15,27 +15,6 @@ class NewTaskData:
     priority: int
 
 
-"""
-class Task(models.Model):
-    class State(models.TextChoices):
-        pending = "pending", "pending"
-        completed = "completed", "completed"
-
-    class Priority(models.IntegerChoices):
-        unknown = 0, "unknown"
-        critical = 1, "critical"
-        high = 2, "high"
-        medium = 3, "medium"
-        low = 4, "low"
-        obsolete = 99, "obsolete"
-
-    title = models.CharField(max_length=200)
-    state = models.CharField(
-        max_length=20, choices=State.choices, default=State.pending
-    )
-    priority = models.IntegerField(choices=Priority.choices, default=Priority.unknown)
-"""
-
 PRIORITY_LABELS = {
     0: "unknown",
     1: "critical",
@@ -46,8 +25,7 @@ PRIORITY_LABELS = {
 }
 
 
-@dataclass
-class Task:
+class Task(BaseModel):
     id: float
     title: str
     state: str
@@ -56,10 +34,9 @@ class Task:
     def human_readable(self) -> str:
         title = self.title.replace("\n", " ")
         priority = self.priority
-        result = f"""Title: {title}
-State: {self.state}"""
+        result = f"""Title: {title}"""
         if self.state != "completed":
-            result += f"\nPriority: {PRIORITY_LABELS[priority]}"
+            result += f"\nState: {self.state}\nPriority: {PRIORITY_LABELS[priority]}"
         return result
 
 

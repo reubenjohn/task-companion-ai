@@ -1,8 +1,13 @@
 import json
+import time
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from companion.db.conversation_history import RedisConversationSummaryBufferMemory
+from companion.db.feed import (
+    events_to_messages,
+    get_feed,
+)
 from companion.tools import bind_query_tasks
 
 AGENT_NAME = "Agent"
@@ -22,6 +27,13 @@ class Companion:
             max_token_limit=max_token_limit,
         )
         memory.fetch_from_db()
+        messages = memory.chat_memory.messages
+        if len(messages) > 0:
+            last_message_timestamp = messages[-1].additional_kwargs.get("creationUtcMillis", None)
+            if last_message_timestamp is not None:
+                feed_since = get_feed(user_id, limit=20, start_time=last_message_timestamp + 1)
+                memory.chat_memory.add_messages(events_to_messages(feed_since))
+
         self.max_message_size = max_message_size
 
         prompt = ChatPromptTemplate.from_messages(
@@ -49,14 +61,23 @@ class Companion:
         self.agent_executor.max_iterations = 0
 
     async def astream_events(self, user_input: str):
+        memory = self.agent_executor.memory  # type: RedisConversationSummaryBufferMemory
+        memory_messages = memory.chat_memory.messages
+        if len(memory_messages) > 0:
+            last_message = memory_messages[-1]
+            if last_message.type == "human" and last_message.content == user_input:
+                memory_messages.pop()
+
+        msg_creation_time_millis = time.time() * 1000
+
         if len(user_input) > self.max_message_size:
             raise Exception(
                 f"User message of size {len(user_input)} exceeds limit of {self.max_message_size}"
             )
+
+        yield f"message_time|{msg_creation_time_millis}"
         async for event in self.runnable.astream_events(
-            {
-                "input": user_input,
-            },
+            {"input": user_input},
             version="v1",
         ):
             kind = event["event"]
@@ -86,5 +107,8 @@ class Companion:
                 )
                 yield f"{kind}|{json.dumps(data)}"
 
-        memory = self.agent_executor.memory  # type: RedisConversationSummaryBufferMemory
+        memory_messages = memory.chat_memory.messages
+        if len(memory_messages) > 0:
+            memory_messages[-1].additional_kwargs["creationUtcMillis"] = msg_creation_time_millis
+
         memory.persist()

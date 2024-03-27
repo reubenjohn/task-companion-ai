@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Feed unit test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "test.companion.db.test_feed",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Python Debugger: Task Companion CLI",
             "type": "debugpy",
             "request": "launch",

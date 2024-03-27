@@ -48,8 +48,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(f"\nAn Error occurred: {str(e)}")
 
     async def respond_to_user(self, user_input: str):
-        self.companion = Companion(self.user_id)
         try:
+            self.companion = Companion(self.user_id)
             async for frame in self.companion.astream_events(user_input):
                 await self.send(frame)
         except Exception as e:

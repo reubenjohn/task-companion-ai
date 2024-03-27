@@ -16,7 +16,6 @@ class RedisConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
         super().save_context(inputs, outputs)
 
     def get_memory_key(self) -> str:
-        self.to_json()
         return f"companion:memory:{self.user_id}:activity"
 
     def persist(self):
