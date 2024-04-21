@@ -8,6 +8,7 @@ from companion.db.feed import (
     events_to_messages,
     get_feed,
 )
+from companion.prompt import TASK_COMPANION_PROMPT
 from companion.tools import bind_query_tasks
 
 AGENT_NAME = "Agent"
@@ -46,7 +47,7 @@ class Companion:
 
         prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", "You are a helpful assistant"),
+                ("system", TASK_COMPANION_PROMPT),
                 MessagesPlaceholder("chat_history", optional=True),
                 ("human", "{input}"),
                 MessagesPlaceholder("agent_scratchpad"),
