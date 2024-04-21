@@ -15,7 +15,11 @@ AGENT_NAME = "Agent"
 
 class Companion:
     def __init__(
-        self, user_id: str, max_message_size: int = 1000, max_token_limit: int = 2000
+        self,
+        user_id: str,
+        timezone: str,
+        max_message_size: int = 1000,
+        max_token_limit: int = 2000,
     ) -> None:
         model = ChatOpenAI(temperature=0, streaming=True)
         memory = RedisConversationSummaryBufferMemory(
@@ -28,11 +32,15 @@ class Companion:
         )
         memory.fetch_from_db()
         messages = memory.chat_memory.messages
-        if len(messages) > 0:
-            last_message_timestamp = messages[-1].additional_kwargs.get("creationUtcMillis", None)
-            if last_message_timestamp is not None:
-                feed_since = get_feed(user_id, limit=20, start_time=last_message_timestamp + 1)
-                memory.chat_memory.add_messages(events_to_messages(feed_since))
+
+        last_message_timestamp = (
+            messages[-1].additional_kwargs.get("creationUtcMillis", None)
+            if len(messages) > 0
+            else 0
+        )
+        if last_message_timestamp is not None:
+            feed_since = get_feed(user_id, limit=20, start_time=last_message_timestamp + 1)
+            memory.chat_memory.add_messages(events_to_messages(feed_since, timezone))
 
         self.max_message_size = max_message_size
 
@@ -60,7 +68,7 @@ class Companion:
     def stop_eventually(self):
         self.agent_executor.max_iterations = 0
 
-    async def astream_events(self, user_input: str):
+    async def astream_events(self, user_input: str, timezone: str):
         memory = self.agent_executor.memory  # type: RedisConversationSummaryBufferMemory
         memory_messages = memory.chat_memory.messages
         if len(memory_messages) > 0:

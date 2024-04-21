@@ -42,16 +42,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()  # Triggers self.disconnect(...)
             elif cmd == "respond":
                 user_input = json_data["payload"]["user_input"]
-                self.respond_task = asyncio.create_task(self.respond_to_user(user_input))
+                timezone = json_data["payload"]["timezone"]
+                self.respond_task = asyncio.create_task(self.respond_to_user(user_input, timezone))
         except Exception as e:
             logging.error(e)
             await self.send(f"\nAn Error occurred: {str(e)}")
 
-    async def respond_to_user(self, user_input: str):
+    async def respond_to_user(self, user_input: str, timezone: str):
         try:
-            self.companion = Companion(self.user_id)
-            async for frame in self.companion.astream_events(user_input):
+            self.companion = Companion(self.user_id, timezone)
+            async for frame in self.companion.astream_events(user_input, timezone):
                 await self.send(frame)
         except Exception as e:
             await self.send(f"error|An error occurred while generating a response: {e}")
+            print(e)
         await self.close()

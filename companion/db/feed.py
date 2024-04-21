@@ -5,6 +5,7 @@ from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AI
 
 from companion.db.tasks import Task
 from companion.db.utils import UserId, redis
+from companion.utils import datetime_from_utc_to_local
 
 
 EVENT_TYPE_CREATE_TASK = "create-task"
@@ -73,24 +74,25 @@ def get_feed(user_id: UserId, limit: int = 10, start_time: float = None) -> List
     return events
 
 
-def event_to_message(event: Event) -> BaseMessage:
+def event_to_message(event: Event, timezone: str) -> BaseMessage:
+    creation_time = datetime_from_utc_to_local(event.creationUtcMillis, timezone)
     if event.type == "create-task":
         return SystemMessage(
-            content=f"A new task was created at {event.creationUtcMillis}:\n{event.task.human_readable()}"
+            content=f"A new task was created at {creation_time}:\n{event.task.human_readable()}"
         )
     elif event.type == "delete-task":
         return SystemMessage(
-            content=f"A task was deleted at {event.creationUtcMillis}:\n{event.task.human_readable()}"
+            content=f"A task was deleted at {creation_time}:\n{event.task.human_readable()}"
         )
     elif event.type == "update-task":
         modifications = "\n".join(
             [
-                f"{key} was changed from '{value}' to '{getattr(event, key, '<None>')}'"
+                f"{key} was changed from '{value}' to '{getattr(event.task, key, '<None>')}'"
                 for key, value in event.previousValues.items()
             ]
         )
         return SystemMessage(
-            content=f"""A task was modified at {event.creationUtcMillis}. The modifications are:
+            content=f"""A task was modified at {creation_time}. The modifications are:
 {modifications}
 The resulting task is:
 {event.task.human_readable()}"""
@@ -108,5 +110,5 @@ The resulting task is:
         raise NotImplementedError("Message type to human readible not yet implemented")
 
 
-def events_to_messages(events: List[Event]) -> List[BaseMessage]:
-    return [event_to_message(event) for event in events]
+def events_to_messages(events: List[Event], timezone: str) -> List[BaseMessage]:
+    return [event_to_message(event, timezone) for event in events]

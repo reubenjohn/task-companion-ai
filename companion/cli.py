@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import json
 from companion.companion import Companion
 
@@ -42,7 +43,7 @@ def multiline_input(prompt: str = ""):
 
 
 def exec_conversation(user_id: str):
-    companion = Companion(user_id)
+    companion = Companion(user_id, datetime.now().astimezone().tzinfo.tzname(None))
 
     while True:
         user_input = multiline_input("User prompt (Ctrl-D or Ctrl-Z on windows to send): ")
